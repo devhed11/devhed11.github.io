@@ -1,0 +1,554 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Devin Hedtkamp — Portfolio</title>
+<meta name="description" content="Full-stack build portfolio — nine production systems built solo for a real, multi-location service business.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #F3F4EF;
+    --surface: #FFFFFF;
+    --surface-2: #E9EBE3;
+    --ink: #1C2321;
+    --ink-soft: #545F55;
+    --ink-faint: #838E80;
+    --border: #DADDD2;
+    --accent: #B96A16;
+    --accent-ink: #8A4E10;
+    --accent-soft: #F3E2C7;
+    --good: #2F7D4F;
+    --good-soft: #DDEEE2;
+    --shadow: 0 1px 2px rgba(28,35,33,0.04), 0 8px 24px -12px rgba(28,35,33,0.12);
+    font-size: 16px;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --bg: #14181A;
+      --surface: #1B211E;
+      --surface-2: #212824;
+      --ink: #ECEEE7;
+      --ink-soft: #AEB8AC;
+      --ink-faint: #7C877D;
+      --border: #313A34;
+      --accent: #E0922F;
+      --accent-ink: #F3C486;
+      --accent-soft: #3A2C15;
+      --good: #52BE83;
+      --good-soft: #1E332A;
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+    }
+  }
+  :root[data-theme="dark"] {
+    --bg: #14181A;
+    --surface: #1B211E;
+    --surface-2: #212824;
+    --ink: #ECEEE7;
+    --ink-soft: #AEB8AC;
+    --ink-faint: #7C877D;
+    --border: #313A34;
+    --accent: #E0922F;
+    --accent-ink: #F3C486;
+    --accent-soft: #3A2C15;
+    --good: #52BE83;
+    --good-soft: #1E332A;
+    --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
+  }
+
+  * { box-sizing: border-box; }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: 'IBM Plex Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .wrap {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 56px 20px 64px;
+  }
+  h1, h2, h3 { text-wrap: balance; margin: 0; }
+  .mono { font-family: 'IBM Plex Mono', ui-monospace, Menlo, Consolas, monospace; }
+  .eyebrow {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    font-weight: 500;
+    letter-spacing: 0.14em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+  }
+
+  /* ---------- Hero ---------- */
+  .hero {
+    position: relative;
+    padding-bottom: 40px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 48px;
+    overflow: hidden;
+  }
+  .hero-grid {
+    position: absolute;
+    inset: -40px -20px auto -20px;
+    height: 340px;
+    background-image:
+      linear-gradient(var(--border) 1px, transparent 1px),
+      linear-gradient(90deg, var(--border) 1px, transparent 1px);
+    background-size: 34px 34px;
+    opacity: 0.35;
+    -webkit-mask-image: linear-gradient(to bottom, black, transparent);
+    mask-image: linear-gradient(to bottom, black, transparent);
+    pointer-events: none;
+  }
+  .hero-inner { position: relative; }
+  .hero h1 {
+    font-size: clamp(2.4rem, 5.5vw, 3.6rem);
+    font-weight: 700;
+    letter-spacing: -0.02em;
+    margin-top: 14px;
+    color: var(--ink);
+  }
+  .tagline {
+    font-size: clamp(1.05rem, 2vw, 1.25rem);
+    color: var(--ink-soft);
+    max-width: 640px;
+    margin-top: 16px;
+  }
+  .route {
+    display: block;
+    margin-top: 28px;
+    width: 100%;
+    max-width: 520px;
+    height: auto;
+  }
+  .route path {
+    stroke: var(--accent);
+    stroke-width: 2;
+    fill: none;
+    stroke-linecap: round;
+    stroke-dasharray: 620;
+    stroke-dashoffset: 620;
+    animation: draw 1.6s ease-out forwards 0.2s;
+  }
+  .route circle { fill: var(--accent); }
+  .route circle.end { fill: var(--good); }
+  @media (prefers-reduced-motion: reduce) {
+    .route path { animation: none; stroke-dashoffset: 0; }
+  }
+  @keyframes draw { to { stroke-dashoffset: 0; } }
+
+  .stats {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+    gap: 24px;
+    margin-top: 40px;
+    max-width: 720px;
+  }
+  .stat-num {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 1.9rem;
+    font-weight: 600;
+    color: var(--accent-ink);
+    font-variant-numeric: tabular-nums;
+  }
+  .stat-label {
+    font-size: 0.85rem;
+    color: var(--ink-soft);
+    margin-top: 4px;
+  }
+
+  /* ---------- Sections ---------- */
+  section.block { margin-bottom: 56px; }
+  .section-head { margin-bottom: 28px; max-width: 680px; }
+  .section-head h2 {
+    font-size: 1.6rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .section-head p {
+    color: var(--ink-soft);
+    margin-top: 8px;
+    font-size: 0.98rem;
+  }
+
+  /* ---------- Flagship cards ---------- */
+  .flagship-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(420px, 1fr));
+    gap: 20px;
+  }
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 26px 26px 24px;
+    box-shadow: var(--shadow);
+    display: flex;
+    flex-direction: column;
+  }
+  .card-top {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  .card h3 {
+    font-size: 1.28rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+  }
+  .pill {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 100px;
+    white-space: nowrap;
+  }
+  .pill.live { background: var(--good-soft); color: var(--good); }
+  .pill.build { background: var(--accent-soft); color: var(--accent-ink); }
+  .card-badges { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .code-link {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.7rem;
+    font-weight: 600;
+    letter-spacing: 0.03em;
+    color: var(--ink-soft);
+    border: 1px solid var(--border);
+    padding: 4px 9px;
+    border-radius: 100px;
+    text-decoration: none;
+    white-space: nowrap;
+    transition: color 0.15s, border-color 0.15s;
+  }
+  .code-link:hover { color: var(--accent-ink); border-color: var(--accent-ink); }
+  .mini-card .code-link { margin-top: 10px; display: inline-block; }
+  .card .pitch {
+    color: var(--ink-soft);
+    font-size: 0.94rem;
+    margin-top: 6px;
+  }
+  .card-body { margin-top: 18px; }
+  .card-label {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.68rem;
+    font-weight: 600;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--ink-faint);
+    margin-bottom: 5px;
+  }
+  .card-label.solve { margin-top: 16px; }
+  .card p.body-text { font-size: 0.93rem; color: var(--ink); }
+  .impact {
+    list-style: none;
+    margin: 16px 0 0;
+    padding: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 7px;
+  }
+  .impact li {
+    font-size: 0.88rem;
+    color: var(--ink-soft);
+    padding-left: 16px;
+    position: relative;
+  }
+  .impact li::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 0.55em;
+    width: 6px;
+    height: 2px;
+    background: var(--accent);
+  }
+  .stack {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
+  .tech {
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 0.72rem;
+    color: var(--ink-soft);
+    background: var(--surface-2);
+    border: 1px solid var(--border);
+    padding: 3px 8px;
+    border-radius: 5px;
+  }
+
+  /* ---------- Secondary grid ---------- */
+  .also-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 16px;
+  }
+  .mini-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 9px;
+    padding: 18px 20px;
+  }
+  .mini-card h4 {
+    font-size: 1.02rem;
+    font-weight: 700;
+    margin: 0 0 6px;
+  }
+  .mini-card p {
+    font-size: 0.86rem;
+    color: var(--ink-soft);
+    margin: 0 0 12px;
+  }
+  .mini-stack { display: flex; flex-wrap: wrap; gap: 5px; }
+  .mini-stack .tech { font-size: 0.66rem; padding: 2px 6px; }
+
+  footer {
+    border-top: 1px solid var(--border);
+    padding-top: 28px;
+    margin-top: 8px;
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  footer .mono { font-size: 0.82rem; color: var(--ink-soft); }
+  footer .mono a { color: var(--accent-ink); text-decoration: none; }
+  footer .mono a:hover { text-decoration: underline; }
+
+  @media (max-width: 480px) {
+    .wrap { padding: 40px 16px 48px; }
+    .card { padding: 20px 18px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+
+  <div class="hero">
+    <div class="hero-grid"></div>
+    <div class="hero-inner">
+      <div class="eyebrow">Full-Stack Developer</div>
+      <h1>Devin Hedtkamp</h1>
+      <p class="tagline">I build the internal software a real, growing service business actually needs — then ship it to production and keep it running. Nine systems shipped solo: revenue dashboards, a homegrown CRM, live inventory sync, automated ops tooling.</p>
+
+      <svg class="route" viewBox="0 0 520 90" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Abstract route line connecting five stops">
+        <path d="M 10,70 C 60,10 100,10 140,45 S 220,80 260,45 S 340,10 380,40 S 460,75 510,20" />
+        <circle cx="10" cy="70" r="5"></circle>
+        <circle cx="140" cy="45" r="4"></circle>
+        <circle cx="260" cy="45" r="4"></circle>
+        <circle cx="380" cy="40" r="4"></circle>
+        <circle class="end" cx="510" cy="20" r="5"></circle>
+      </svg>
+
+      <div class="stats">
+        <div>
+          <div class="stat-num">9</div>
+          <div class="stat-label">Production systems shipped</div>
+        </div>
+        <div>
+          <div class="stat-num">3</div>
+          <div class="stat-label">External APIs wired up</div>
+        </div>
+        <div>
+          <div class="stat-num">790K+</div>
+          <div class="stat-label">Records migrated &amp; synced</div>
+        </div>
+        <div>
+          <div class="stat-num">Solo</div>
+          <div class="stat-label">Idea to production, no dev team</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <section class="block">
+    <div class="section-head">
+      <div class="eyebrow">Flagship builds</div>
+      <h2>Four systems running the business day to day</h2>
+      <p>Built for Holper's Pest &amp; Animal Solutions, a multi-location field service company — each one replaced a manual process or a third-party tool that didn't fit how the business actually runs.</p>
+    </div>
+
+    <div class="flagship-grid">
+
+      <article class="card">
+        <div class="card-top">
+          <h3>Sales Dashboard</h3>
+          <div class="card-badges">
+            <span class="pill live">Live · Daily use</span>
+            <a class="code-link" href="https://github.com/devhed11/Sales-Dashboard" target="_blank" rel="noopener">View code →</a>
+          </div>
+        </div>
+        <p class="pitch">Ties call-tracking data to CRM sales records so leadership can finally see which reps convert calls into customers.</p>
+        <div class="card-body">
+          <div class="card-label">The problem</div>
+          <p class="body-text">Inbound calls lived in one system, actual sales and revenue in another. Measuring rep performance meant hand-reconciling spreadsheets every month, and by the time anyone saw the numbers they were stale.</p>
+          <div class="card-label solve">The build</div>
+          <p class="body-text">A service that syncs both APIs every night, phone-matches callers to customers, and attributes revenue by rep, service line, and lead source — with seasonally-adjusted forecasting and role-based accounts so reps see their own numbers and admins see everything.</p>
+        </div>
+        <ul class="impact">
+          <li>Replaced a monthly manual reconciliation with a live, nightly-refreshed dashboard</li>
+          <li>Per-rep, per-service, and per-source conversion and revenue tracking</li>
+          <li>Seasonally-adjusted forecasting against a Midwest demand curve</li>
+        </ul>
+        <div class="stack">
+          <span class="tech">FastAPI</span><span class="tech">PostgreSQL</span><span class="tech">React</span>
+          <span class="tech">Nightly ETL</span><span class="tech">CallRail API</span><span class="tech">Railway</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <h3>InventorySystem</h3>
+          <div class="card-badges">
+            <span class="pill live">Live · Daily use</span>
+            <a class="code-link" href="https://github.com/devhed11/InventorySystem" target="_blank" rel="noopener">View code →</a>
+          </div>
+        </div>
+        <p class="pitch">Automatically deducts chemical and equipment inventory as field jobs complete — no more guessing what's left on the truck.</p>
+        <div class="card-body">
+          <div class="card-label">The problem</div>
+          <p class="body-text">Chemical and equipment inventory across 16+ field technicians was tracked by hand, with no reliable link between what a job actually used and what was left on the truck or in the warehouse.</p>
+          <div class="card-label solve">The build</div>
+          <p class="body-text">A sync pipeline that pulls completed jobs and product usage from the field-service platform daily, resolves real-world unit conversions, and deducts consumed product from each technician's truck automatically — with live stock visibility across two separate warehouse locations.</p>
+        </div>
+        <ul class="impact">
+          <li>Automatic, job-linked deduction — replaced manual restock tracking</li>
+          <li>Per-technician truck inventory + dual-warehouse stock visibility</li>
+          <li>Separate handling for consumables vs. deployable vs. assigned equipment</li>
+        </ul>
+        <div class="stack">
+          <span class="tech">Flask</span><span class="tech">PostgreSQL</span><span class="tech">FieldRoutes API</span>
+          <span class="tech">Daily sync jobs</span><span class="tech">Railway</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <h3>MWP-CRM</h3>
+          <div class="card-badges">
+            <span class="pill build">Active build</span>
+            <a class="code-link" href="https://github.com/devhed11/MWP-CRM" target="_blank" rel="noopener">View code →</a>
+          </div>
+        </div>
+        <p class="pitch">A ground-up CRM built to fully replace the company's third-party field-service platform.</p>
+        <div class="card-body">
+          <div class="card-label">The problem</div>
+          <p class="body-text">The business ran entirely on a generic, expensive third-party CRM that wasn't built for how a pest-control operation actually schedules, routes, and documents its work.</p>
+          <div class="card-label solve">The build</div>
+          <p class="body-text">An in-house system covering customers, scheduling, routing, documents, and e-signatures — migrated from the legacy platform with verified record-for-record parity, then extended with a capacity- and geography-aware scheduling engine built from scratch.</p>
+        </div>
+        <ul class="impact">
+          <li>Migrated ~75,000 customers, 143,000+ appointments, 434,000+ invoices with verified parity</li>
+          <li>Auto-scheduling engine balancing tech capacity, geography, and service cadence</li>
+          <li>In-app document builder with drag-and-drop templates and real e-signature capture</li>
+        </ul>
+        <div class="stack">
+          <span class="tech">FastAPI</span><span class="tech">SQLAlchemy</span><span class="tech">Alembic</span>
+          <span class="tech">React · Vite</span><span class="tech">JWT auth</span><span class="tech">PostgreSQL</span>
+        </div>
+      </article>
+
+      <article class="card">
+        <div class="card-top">
+          <h3>FieldCall</h3>
+          <div class="card-badges">
+            <span class="pill live">Live · Weekly use</span>
+            <a class="code-link" href="https://github.com/devhed11/fieldcall" target="_blank" rel="noopener">View code →</a>
+          </div>
+        </div>
+        <p class="pitch">Turns "everyone dial into the weekly call" into one phone number and a live attendance board.</p>
+        <div class="card-body">
+          <div class="card-label">The problem</div>
+          <p class="body-text">Weekly field-team check-ins depended on someone manually calling around, or hoping the whole crew remembered to dial into a shared line at the right time.</p>
+          <div class="card-label solve">The build</div>
+          <p class="body-text">A Twilio-powered conferencing system — technicians dial one number and are auto-joined into that week's call, while a live dashboard resolves each caller to their name in real time. Calls record and transcribe automatically once they end.</p>
+        </div>
+        <ul class="impact">
+          <li>One number replaces manual roll-call coordination every Monday</li>
+          <li>Live attendance dashboard, resolved from phone number to technician name</li>
+          <li>Automatic recording + transcription — a searchable record of every call</li>
+        </ul>
+        <div class="stack">
+          <span class="tech">Node.js</span><span class="tech">Express</span><span class="tech">Twilio Voice</span>
+          <span class="tech">PostgreSQL</span><span class="tech">Railway</span>
+        </div>
+      </article>
+
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="section-head">
+      <div class="eyebrow">Also shipped</div>
+      <h2>Smaller tools, same habit — see a manual process, replace it</h2>
+    </div>
+    <div class="also-grid">
+
+      <div class="mini-card">
+        <h4>DIY Academy</h4>
+        <p>Consumer mobile app teaching home-repair skills through step-by-step guides with custom animated diagrams. Deployed as an installable PWA.</p>
+        <div class="mini-stack"><span class="tech">React Native</span><span class="tech">Expo</span><span class="tech">SVG</span></div>
+      </div>
+
+      <div class="mini-card">
+        <h4>TaskBoard</h4>
+        <p>Self-hosted Trello-style project tool with drag-and-drop boards, recurring tasks, reusable templates, and role-based team management.</p>
+        <div class="mini-stack"><span class="tech">FastAPI</span><span class="tech">React</span><span class="tech">Postgres</span></div>
+        <a class="code-link" href="https://github.com/devhed11/Holpers-Task-Board" target="_blank" rel="noopener">View code →</a>
+      </div>
+
+      <div class="mini-card">
+        <h4>Agreements Tracker</h4>
+        <p>Live report surfacing every signed vs. unsigned service agreement across the active customer base — replaced a manually-maintained spreadsheet.</p>
+        <div class="mini-stack"><span class="tech">Flask</span><span class="tech">FieldRoutes API</span></div>
+        <a class="code-link" href="https://github.com/devhed11/holpers-agreements-web" target="_blank" rel="noopener">View code →</a>
+      </div>
+
+      <div class="mini-card">
+        <h4>Timeclock Audit</h4>
+        <p>Cross-references field technicians' clock punches against their actual completed jobs, flags discrepancies, and generates a branded PDF report.</p>
+        <div class="mini-stack"><span class="tech">Python</span><span class="tech">ReportLab</span></div>
+        <a class="code-link" href="https://github.com/devhed11/holpers-timeclock-web" target="_blank" rel="noopener">View code →</a>
+      </div>
+
+      <div class="mini-card">
+        <h4>Pest Heat Map</h4>
+        <p>Geographic visualization plotting years of service history by category to reveal regional service patterns at a glance.</p>
+        <div class="mini-stack"><span class="tech">Flask</span><span class="tech">Geospatial</span></div>
+        <a class="code-link" href="https://github.com/devhed11/Pest-Heat-Map" target="_blank" rel="noopener">View code →</a>
+      </div>
+
+      <div class="mini-card">
+        <h4>Sales CRM Tooling</h4>
+        <p>Internal reference-data tooling for FieldRoutes lead sources and customer flag types, built alongside the Sales Dashboard.</p>
+        <div class="mini-stack"><span class="tech">Next.js</span><span class="tech">TypeScript</span></div>
+        <a class="code-link" href="https://github.com/devhed11/sales-crm" target="_blank" rel="noopener">View code →</a>
+      </div>
+
+    </div>
+  </section>
+
+  <footer>
+    <div class="mono"><a href="https://github.com/devhed11" target="_blank" rel="noopener">github.com/devhed11</a></div>
+    <div class="mono">
+      <a href="mailto:devhed11@gmail.com">devhed11@gmail.com</a>
+      &nbsp;·&nbsp;
+      <a href="https://www.linkedin.com/in/devin-hedtkamp-6b93a8308/" target="_blank" rel="noopener">linkedin.com/in/devin-hedtkamp</a>
+    </div>
+  </footer>
+
+</div>
+</body>
+</html>
