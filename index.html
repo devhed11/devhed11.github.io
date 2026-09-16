@@ -452,28 +452,28 @@
 
       <article class="card">
         <div class="card-top">
-          <h3>MWP-CRM</h3>
+          <h3>Midwest PC CRM</h3>
           <div class="card-badges">
-            <span class="pill build">Active build</span>
-            <a class="demo-link" href="demo/mwp-crm/" target="_blank" rel="noopener">Try live demo →</a>
+            <span class="pill live">Live · Daily use</span>
+            <a class="demo-link" href="demo/mwp-crm-lookup.html" target="_blank" rel="noopener">Try live demo →</a>
             <a class="code-link" href="https://github.com/devhed11/MWP-CRM" target="_blank" rel="noopener">View code →</a>
           </div>
         </div>
-        <p class="pitch">A ground-up CRM built to fully replace the company's third-party field-service platform.</p>
+        <p class="pitch">A searchable archive for a legacy customer database that a platform switch would have otherwise left behind.</p>
         <div class="card-body">
           <div class="card-label">The problem</div>
-          <p class="body-text">The business ran entirely on a generic, expensive third-party CRM that wasn't built for how a pest-control operation actually schedules, routes, and documents its work.</p>
+          <p class="body-text">Years of customer orders, payments, and service notes lived only in an old system's raw database exports — effectively frozen and unsearchable once the business moved to a new platform.</p>
           <div class="card-label solve">The build</div>
-          <p class="body-text">An in-house system covering customers, scheduling, routing, documents, and e-signatures — migrated from the legacy platform with verified record-for-record parity, then extended with a capacity- and geography-aware scheduling engine built from scratch.</p>
+          <p class="body-text">A Flask + PostgreSQL tool that ingests the legacy SQL/CSV exports directly (chunked upload so large dumps don't time out), then gives office staff instant search by customer number, name, or address — full order history, line items, payments, and notes, browsable exactly like the old system, just faster and always on.</p>
         </div>
         <ul class="impact">
-          <li>Migrated ~75,000 customers, 143,000+ appointments, 434,000+ invoices with verified parity</li>
-          <li>Auto-scheduling engine balancing tech capacity, geography, and service cadence</li>
-          <li>In-app document builder with drag-and-drop templates and real e-signature capture</li>
+          <li>Instant search by number, name, or address across the entire legacy customer base</li>
+          <li>Every historical order's line items, payments, and notes preserved and browsable per customer</li>
+          <li>Chunked SQL/CSV ingestion pipeline handles large legacy database dumps reliably</li>
         </ul>
         <div class="stack">
-          <span class="tech">FastAPI</span><span class="tech">SQLAlchemy</span><span class="tech">Alembic</span>
-          <span class="tech">React · Vite</span><span class="tech">JWT auth</span><span class="tech">PostgreSQL</span>
+          <span class="tech">Flask</span><span class="tech">PostgreSQL</span><span class="tech">psycopg2</span>
+          <span class="tech">Railway</span>
         </div>
       </article>
 

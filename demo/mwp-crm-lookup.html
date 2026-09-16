@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midwest PC CRM Demo</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500;600&display=swap');
+  :root{
+    --bg:#0f1117;--bg2:#161b27;--bg3:#1e2537;--border:#2a3347;
+    --accent:#f4a30a;--accent2:#e8891a;--green:#22c55e;--red:#ef4444;
+    --text:#e2e8f0;--text2:#94a3b8;--text3:#64748b;
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  body{font-family:'Barlow',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;overflow-x:hidden}
+
+  /* TOPBAR */
+  #topbar{background:var(--bg2);border-bottom:2px solid var(--accent);padding:0 28px;display:flex;align-items:center;height:60px;gap:16px;position:sticky;top:0;z-index:100;}
+  .logo{font-family:'Barlow Condensed',sans-serif;font-weight:800;font-size:20px;letter-spacing:2px;color:var(--accent);text-transform:uppercase;white-space:nowrap;}
+  .logo span{color:var(--text2);font-weight:400}
+  .spacer{flex:1}
+  .nav-btn{font-family:'Barlow Condensed',sans-serif;font-weight:600;font-size:12px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text2);background:none;border:none;cursor:pointer;padding:6px 10px;border-radius:4px;transition:.2s;text-decoration:none;display:inline-flex;align-items:center;gap:5px;}
+  .nav-btn:hover,.nav-btn.active{color:var(--accent);background:rgba(244,163,10,.1)}
+
+  /* PAGES */
+  .page{display:none}.page.active{display:block}
+  #home{display:none;flex-direction:column;align-items:center;justify-content:center;min-height:calc(100vh - 60px);padding:40px 24px;text-align:center;background:radial-gradient(ellipse at 50% 0%,rgba(244,163,10,.06) 0%,transparent 60%)}
+  #home.active{display:flex}
+
+  /* HOME */
+  .home-badge{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:3px;text-transform:uppercase;color:var(--accent);background:rgba(244,163,10,.12);border:1px solid rgba(244,163,10,.3);padding:4px 14px;border-radius:20px;margin-bottom:24px;}
+  .home-title{font-family:'Barlow Condensed',sans-serif;font-size:clamp(44px,8vw,84px);font-weight:800;letter-spacing:-1px;line-height:1;margin-bottom:16px;}
+  .home-title em{color:var(--accent);font-style:normal}
+  .home-sub{font-size:16px;font-weight:300;color:var(--text2);max-width:500px;margin-bottom:48px;line-height:1.6}
+  .home-stats{color:var(--text3);font-size:13px;margin-top:8px}
+  .no-data-banner{background:rgba(244,163,10,.08);border:1.5px solid rgba(244,163,10,.3);border-radius:12px;padding:20px 28px;margin-bottom:40px;max-width:500px;width:100%;}
+  .no-data-banner p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:12px;}
+  .no-data-banner a{display:inline-block;background:var(--accent);color:#0f1117;border-radius:8px;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;}
+
+  /* SEARCH CARDS */
+  .search-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:760px;width:100%;margin-bottom:40px;}
+  .search-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:28px 20px 24px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:12px;}
+  .search-card:hover{border-color:var(--accent);background:var(--bg3);transform:translateY(-2px);box-shadow:0 8px 24px rgba(0,0,0,.4)}
+  .search-card .icon{width:48px;height:48px;background:rgba(244,163,10,.12);border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;}
+  .search-card h3{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;}
+  .search-card p{font-size:12px;color:var(--text3);text-align:center;line-height:1.4}
+
+  /* SEARCH PAGE */
+  #search-page{max-width:1100px;margin:0 auto;padding:36px 24px}
+  .page-header{display:flex;align-items:center;gap:14px;margin-bottom:28px;}
+  .back-btn{background:var(--bg3);border:1.5px solid var(--border);color:var(--text2);padding:8px 16px;border-radius:8px;cursor:pointer;font-family:'Barlow',sans-serif;font-size:13px;font-weight:500;transition:.2s;display:flex;align-items:center;gap:6px;text-decoration:none;}
+  .back-btn:hover{border-color:var(--accent);color:var(--accent)}
+  .section-title{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;letter-spacing:1px;text-transform:uppercase;}
+  .section-title span{color:var(--accent)}
+  .search-bar-wrap{display:flex;gap:12px;margin-bottom:28px;}
+  .search-input{flex:1;background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;color:var(--text);font-family:'Barlow',sans-serif;font-size:16px;padding:13px 18px;outline:none;transition:.2s;}
+  .search-input::placeholder{color:var(--text3)}
+  .search-input:focus{border-color:var(--accent)}
+  .search-go-btn{background:var(--accent);color:#0f1117;border:none;border-radius:10px;padding:13px 28px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:15px;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:.2s;white-space:nowrap;}
+  .search-go-btn:hover{background:var(--accent2)}
+
+  /* RESULTS */
+  .results-count{font-family:'Barlow Condensed',sans-serif;font-size:12px;letter-spacing:1px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;}
+  .results-count strong{color:var(--accent)}
+  .results-table{width:100%;border-collapse:separate;border-spacing:0 4px;}
+  .results-table th{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:6px 14px;text-align:left;border-bottom:1px solid var(--border);}
+  .results-table td{padding:13px 14px;font-size:13px;background:var(--bg2);vertical-align:middle;}
+  .results-table td:first-child{border-radius:8px 0 0 8px}
+  .results-table td:last-child{border-radius:0 8px 8px 0}
+  .result-row{cursor:pointer;transition:.15s}
+  .result-row:hover td{background:var(--bg3)}
+  .result-row:hover td:first-child{border-left:3px solid var(--accent);padding-left:11px}
+  .cnum{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--accent);font-size:15px;}
+  .no-results{text-align:center;padding:60px 20px;color:var(--text3);font-size:15px}
+  .no-results .big{font-size:40px;margin-bottom:12px}
+
+  /* CUSTOMER PAGE */
+  #customer-page{max-width:1100px;margin:0 auto;padding:36px 24px}
+  .customer-header{background:var(--bg2);border:1.5px solid var(--border);border-radius:14px;padding:26px 30px;margin-bottom:20px;display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;}
+  .customer-number{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);margin-bottom:6px;}
+  .customer-name{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;letter-spacing:.5px;margin-bottom:16px;}
+  .contact-grid{display:flex;flex-wrap:wrap;gap:18px;}
+  .contact-item .label{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:2px;}
+  .contact-item .val{color:var(--text);font-weight:500;font-size:14px;}
+  .stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:20px;}
+  .stat-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:16px 18px;}
+  .stat-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:7px;}
+  .stat-value{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:var(--text)}
+  .stat-value.money{color:var(--green)}.stat-value.warn{color:var(--accent)}
+
+  /* TABS */
+  .tabs{display:flex;gap:4px;margin-bottom:18px;border-bottom:1.5px solid var(--border);}
+  .tab-btn{font-family:'Barlow Condensed',sans-serif;font-size:12px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);background:none;border:none;padding:10px 16px;cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1.5px;transition:.15s;}
+  .tab-btn:hover{color:var(--text)}
+  .tab-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+  .tab-panel{display:none}.tab-panel.active{display:block}
+
+  /* COLLAPSIBLE ORDERS */
+  .order-group{margin-bottom:4px}
+  .order-header-row{display:grid;grid-template-columns:30px 120px 110px 80px 90px 90px 1fr 120px;align-items:center;background:var(--bg2);border-radius:8px;cursor:pointer;padding:0 4px;transition:.15s;user-select:none;min-height:46px;}
+  .order-header-row:hover{background:var(--bg3)}
+  .order-header-row.expanded{border-radius:8px 8px 0 0;border-bottom:1px solid var(--border);background:var(--bg3)}
+  .order-header-row.expanded .chevron{transform:rotate(90deg)}
+  .chevron{display:flex;align-items:center;justify-content:center;width:24px;height:24px;color:var(--text3);font-size:11px;transition:transform .2s;flex-shrink:0;}
+  .order-header-row.no-items .chevron{color:var(--border)}
+  .oh-cell{padding:10px 8px;font-size:13px}
+  .oh-cell.order-num{font-family:'Barlow Condensed',sans-serif;font-weight:700;color:var(--accent);font-size:15px}
+  .oh-cell.order-date{color:var(--text2)}
+  .oh-cell.order-svc{color:var(--text2);font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .oh-cell.order-time{color:var(--text3);font-size:11px}
+  .otech{background:rgba(59,130,246,.15);color:#93c5fd;border:1px solid rgba(59,130,246,.25);padding:2px 7px;border-radius:4px;font-size:11px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px}
+  .order-item-count{font-size:10px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;color:var(--text3);background:var(--bg3);border:1px solid var(--border);border-radius:10px;padding:2px 6px;margin-left:5px}
+  .order-header-row.expanded .order-item-count{background:rgba(244,163,10,.1);border-color:rgba(244,163,10,.3);color:var(--accent)}
+  .items-drawer{display:none;background:#111624;border-radius:0 0 8px 8px;border:1px solid var(--border);border-top:none;overflow:hidden}
+  .items-drawer.open{display:block}
+  .drawer-item{display:grid;grid-template-columns:90px 90px 1fr 90px;align-items:center;padding:9px 14px 9px 44px;border-bottom:1px solid rgba(42,51,71,.5);transition:.1s}
+  .drawer-item:last-child{border-bottom:none}
+  .drawer-item:hover{background:rgba(255,255,255,.02)}
+  .di-date{color:var(--text3);font-size:11px}
+  .di-type{font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--accent)}
+  .di-desc{color:var(--text2);font-size:12px;padding-right:12px}
+  .di-price{font-size:13px;font-weight:600;text-align:right}
+  .di-price.pos{color:var(--green)}.di-price.neg{color:var(--red)}.di-price.zero{color:var(--text3)}
+  .orders-col-header{display:grid;grid-template-columns:30px 120px 110px 80px 90px 90px 1fr 120px;padding:0 4px;margin-bottom:6px}
+  .orders-col-header span{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:4px 8px}
+
+  /* NOTES */
+  .notes-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+  .note-item{background:var(--bg2);border:1.5px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:12px 16px;font-size:13px;color:var(--text2);line-height:1.5}
+  .comment-box{background:var(--bg2);border:1.5px solid var(--border);border-radius:10px;padding:18px;font-size:14px;color:var(--text2);line-height:1.7;white-space:pre-wrap}
+  .section-sub{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin:18px 0 10px}
+
+  /* FINANCIAL */
+  .fin-grid-3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px}
+  .fin-grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:18px}
+  .pay-methods{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px}
+  .pay-chip{background:var(--bg2);border:1.5px solid var(--border);border-radius:8px;padding:10px 16px;min-width:110px}
+  .pay-chip-label{font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:4px}
+  .pay-chip-val{font-size:16px;font-weight:600;color:var(--green)}
+
+  /* LOADING */
+  #loading{display:none;position:fixed;inset:0;background:rgba(15,17,23,.85);z-index:999;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+  #loading.show{display:flex}
+  .spinner{width:38px;height:38px;border:3px solid var(--border);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .loading-text{color:var(--text2);font-size:13px;font-family:'Barlow Condensed',sans-serif;letter-spacing:2px;text-transform:uppercase}
+  .empty-state{text-align:center;padding:44px;color:var(--text3);font-size:14px}
+
+  ::-webkit-scrollbar{width:6px}
+  ::-webkit-scrollbar-track{background:var(--bg)}
+  ::-webkit-scrollbar-thumb{background:var(--border);border-radius:3px}
+
+  @media(max-width:700px){
+    .search-grid{grid-template-columns:1fr}
+    .stats-row{grid-template-columns:1fr 1fr}
+    .notes-grid,.fin-grid-3,.fin-grid-2{grid-template-columns:1fr}
+    .customer-header{grid-template-columns:1fr}
+    .order-header-row,.orders-col-header{grid-template-columns:30px 90px 90px 70px 80px 80px}
+    .oh-cell.order-svc,.oh-cell.order-time{display:none}
+    .orders-col-header span:nth-child(7),.orders-col-header span:nth-child(8){display:none}
+  }
+</style>
+</head>
+<body>
+
+<div id="loading"><div class="spinner"></div><div class="loading-text">Loading…</div></div>
+
+<div id="topbar">
+  <div class="logo">Midwest <span>PC</span> CRM</div>
+  <div class="spacer"></div>
+  <button class="nav-btn active" id="nav-home" onclick="showHome()">🏠 Home</button>
+  <button class="nav-btn" id="nav-num"  onclick="showSearch('number')">🔢 By Number</button>
+  <button class="nav-btn" id="nav-name" onclick="showSearch('name')">👤 By Name</button>
+  <button class="nav-btn" id="nav-addr" onclick="showSearch('address')">📍 By Address</button>
+  <a class="nav-btn" href="javascript:void(0)" onclick="alert('Demo mode — upload is disabled.')">📂 Upload Data</a>
+  <a class="nav-btn" href="javascript:void(0)" onclick="alert('Demo mode — sign out is disabled so you can keep exploring.')">🚪 Logout</a>
+</div>
+
+<!-- HOME -->
+<div id="home" class="page active">
+  <div class="home-badge">🐛 Pest Control Management System</div>
+  <h1 class="home-title">Welcome to<br><em>Midwest PC</em> CRM</h1>
+  <p class="home-sub">Search and manage your customer database. Look up customers by number, name, or address.</p>
+
+  <div class="search-grid">
+    <div class="search-card" onclick="showSearch('number')">
+      <div class="icon">🔢</div><h3>Customer Number</h3>
+      <p>Search by unique customer account number</p>
+    </div>
+    <div class="search-card" onclick="showSearch('name')">
+      <div class="icon">👤</div><h3>First or Last Name</h3>
+      <p>Search by contact name or last name</p>
+    </div>
+    <div class="search-card" onclick="showSearch('address')">
+      <div class="icon">📍</div><h3>Address</h3>
+      <p>Search by street address or city</p>
+    </div>
+  </div>
+  <div class="home-stats">✅ 7,800 customers · 61,400 orders · 148,200 line items</div>
+</div>
+
+<!-- SEARCH -->
+<div id="search-page" class="page">
+  <div class="page-header">
+    <button class="back-btn" onclick="showHome()">← Back</button>
+    <h2 class="section-title" id="search-title">Search <span>Customers</span></h2>
+  </div>
+  <div class="search-bar-wrap">
+    <input type="text" class="search-input" id="search-input"
+      placeholder="Type to search…"
+      onkeydown="if(event.key==='Enter')doSearch()">
+    <button class="search-go-btn" onclick="doSearch()">Search</button>
+  </div>
+  <div id="results-area">
+    <div class="no-results"><div class="big">🔍</div>Enter a search term and press Search</div>
+  </div>
+</div>
+
+<!-- CUSTOMER -->
+<div id="customer-page" class="page">
+  <div style="margin-bottom:18px">
+    <button class="back-btn" onclick="goBackToSearch()">← Back to Results</button>
+  </div>
+  <div id="customer-detail"></div>
+</div>
+
+<script>
+// ─── DEMO MODE — intercepts /api/search and /api/customer with fake in-memory
+// data. Everything else in this file is the REAL, unmodified frontend. ──────
+(function(){
+  const FIRST = ['Jordan','Casey','Morgan','Taylor','Riley','Avery','Drew','Reese','Skyler','Cameron','Dakota','Rowan','Emerson','Finley','Harper','Quinn','Sawyer','Blake','Peyton','Hayden'];
+  const LAST = ['Whitfield','Brennan','Okafor','Delgado','Nakamura','Petrov','Alvarado','Lindqvist','Marsh','Falcone','Reyes','Kowalski','Bianchi','Osei','Vance','Doyle','Fontaine','Larkin','Sundberg','Mercer'];
+  const STREETS = ['Windstream Ct','Cloverdale Dr','Robbins Rd','Barbee Ln','Seibert Ave','Liberty Village Dr','Vasel Dr','Lockett Ln','Brown Fox Dr','Connolly Dr'];
+  const CITIES = [['St Peters','MO'],['Florissant','MO'],['Ferguson','MO'],['Kirkwood','MO'],['Creve Coeur','MO'],['St Louis','MO']];
+  const SERVICES = ['Silver Service XP','General Pest Quarterly','Termite Bait Renewal','Mole & Vole Program','Rodent Station Check','Mosquito Package','Gold Service Program'];
+  const TECHS = ['JW','CB','MO','TD','RN','AP','DA','RL'];
+  const PAY_TYPES = ['CC','ACH','CHECK','CASH'];
+  function irand(a,b){ return Math.floor(Math.random()*(b-a+1))+a; }
+  function pick(a){ return a[irand(0,a.length-1)]; }
+  function pad(n){ return String(n).padStart(2,'0'); }
+  function dstr(d){ return d.getFullYear()+'-'+pad(d.getMonth()+1)+'-'+pad(d.getDate()); }
+  function daysAgo(n){ return dstr(new Date(Date.now()-n*86400000)); }
+
+  const CUSTOMERS = [];
+  for (let i=0;i<60;i++){
+    const first = pick(FIRST), last = pick(LAST);
+    const [city,state] = pick(CITIES);
+    const commercial = Math.random() < 0.06;
+    CUSTOMERS.push({
+      cseq: i+1, cnumber: String(10001+i),
+      ccontac: first+' '+last, cname: first+' '+last,
+      ccompany: commercial ? last+' Properties LLC' : '',
+      caddr1: irand(100,9999)+' '+pick(STREETS), caddr2: '',
+      ccity: city, cstate: state, czip: String(irand(63000,63999)),
+      cphone: '(314) 555-'+String(irand(0,9999)).padStart(4,'0'),
+      cphone2: Math.random()<0.3 ? '(636) 555-'+String(irand(0,9999)).padStart(4,'0') : '',
+      cphone3: '',
+      cemail: (first+'.'+last+'@example.com').toLowerCase(),
+      clconta: daysAgo(irand(1,120)), cfirstdate: daysAgo(irand(200,2500)),
+      cflag: Math.random()<0.15 ? pick(['VIP','Prepay','Do Not Solicit']) : '',
+      cterms: pick(['Net 15','Net 30','Due on Receipt']),
+      ccampai: Math.random()<0.3 ? pick(['Google Ads','Referral','Home Advisor']) : '',
+      chistory1:'',chistory2:'',chistory3:'',chistory4:'',chistory5:'',chistory6:'',chistory7:'',chistory8:'',chistory9:'',chistory10:'',
+      ccomment: Math.random()<0.2 ? 'Gate code required at rear entrance. Dog on property.' : '',
+      cbalanc: Math.random()<0.25 ? irand(20,300) : 0,
+    });
+  }
+
+  const ORDERS = {}, ITEMS = {}, HISTORY = {};
+  CUSTOMERS.forEach(c=>{
+    const n = irand(3,24);
+    const orders = [];
+    let onum = irand(600000,699999);
+    for (let j=0;j<n;j++){
+      onum += irand(3000,9000);
+      const amt = irand(35,220);
+      const paid = Math.random()<0.85 ? -amt : (Math.random()<0.5 ? -irand(0,amt) : 0);
+      orders.push({
+        onumber: onum, oorderdate: daysAgo(irand(0,900)), otech: pick(TECHS),
+        oamount: amt, oamtpaid: paid,
+        ocomment: pick(SERVICES), otimecomment: pick(['8:00 AM','10:30 AM','1:00 PM','3:30 PM']),
+      });
+      if (Math.random() < 0.5) {
+        const items = [];
+        const itemN = irand(1,3);
+        for (let k=0;k<itemN;k++){
+          items.push({
+            exonumber: onum, exorder: daysAgo(irand(0,900)),
+            extype: pick(['CHARGE','PAYMENT','ADJUST']),
+            exseria: pick(SERVICES)+' — '+pick(['Backyard','Full Perimeter','Interior + Exterior','Foundation']),
+            exprice: Math.random()<0.7 ? irand(20,150) : -irand(20,150),
+          });
+        }
+        ITEMS[onum] = items;
+      }
+    }
+    ORDERS[c.cnumber] = orders;
+    if (Math.random() < 0.4) {
+      HISTORY[c.cseq] = Array.from({length: irand(1,4)}, () => ({
+        hdate: daysAgo(irand(0,400)), huser: pick(['ADMIN','OFFICE1','OFFICE2']),
+        hnote: pick(['Called to confirm appointment window.','Left voicemail re: renewal.','Customer requested reschedule.','Applied credit for missed visit.','Updated contact phone number.']),
+      }));
+    }
+  });
+
+  function matches(c, mode, needle){
+    if (mode === 'number') return c.cnumber.toLowerCase().includes(needle);
+    if (mode === 'name') return (c.ccontac||'').toLowerCase().includes(needle) || (c.cname||'').toLowerCase().includes(needle) || (c.ccompany||'').toLowerCase().includes(needle);
+    return (c.caddr1||'').toLowerCase().includes(needle) || (c.ccity||'').toLowerCase().includes(needle) || (c.czip||'').toLowerCase().includes(needle);
+  }
+
+  const realFetch = window.fetch.bind(window);
+  window.fetch = async function(url, options){
+    const u = typeof url === 'string' ? url : url.url;
+    await new Promise(r=>setTimeout(r,120));
+    if (u.startsWith('/api/search')) {
+      const params = new URLSearchParams(u.split('?')[1] || '');
+      const mode = params.get('mode') || 'name';
+      const q = (params.get('q') || '').toLowerCase();
+      const rows = CUSTOMERS.filter(c => matches(c, mode, q)).slice(0, 200).map(c => ({
+        cseq: c.cseq, cnumber: c.cnumber, display_name: c.ccontac || c.cname || '(No Name)',
+        company: c.ccompany, addr: [c.caddr1, c.ccity, c.cstate, c.czip].filter(Boolean).join(' '),
+        phone: c.cphone, balance: c.cbalanc, order_count: (ORDERS[c.cnumber] || []).length,
+      }));
+      return new Response(JSON.stringify(rows), { status: 200, headers: {'Content-Type':'application/json'} });
+    }
+    if (u.startsWith('/api/customer/')) {
+      const cseq = decodeURIComponent(u.split('/api/customer/')[1]);
+      const c = CUSTOMERS.find(x => String(x.cseq) === cseq);
+      if (!c) return new Response(JSON.stringify({error:'Not found'}), {status:404});
+      const data = { customer: c, orders: ORDERS[c.cnumber] || [], items: Object.values(ITEMS).flat().filter(i => (ORDERS[c.cnumber]||[]).some(o=>o.onumber===i.exonumber)), history: HISTORY[c.cseq] || [] };
+      return new Response(JSON.stringify(data), { status: 200, headers: {'Content-Type':'application/json'} });
+    }
+    return realFetch(url, options);
+  };
+})();
+
+let currentMode = 'name';
+let lastTerm = '';
+
+function showLoading(v){ document.getElementById('loading').classList.toggle('show',v) }
+
+function setNavActive(id){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const el = document.getElementById(id);
+  if(el) el.classList.add('active');
+}
+
+function showPage(id){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showHome(){
+  showPage('home');
+  setNavActive('nav-home');
+}
+
+function showSearch(mode){
+  currentMode = mode;
+  showPage('search-page');
+  const ids = {number:'nav-num',name:'nav-name',address:'nav-addr'};
+  setNavActive(ids[mode]);
+  const titles = {number:'Search by <span>Customer Number</span>',name:'Search by <span>Name</span>',address:'Search by <span>Address</span>'};
+  const ph = {number:'Enter customer number (e.g. 10001)…',name:'Enter first or last name…',address:'Enter street address or city…'};
+  document.getElementById('search-title').innerHTML = titles[mode];
+  const inp = document.getElementById('search-input');
+  inp.placeholder = ph[mode];
+  inp.value = lastTerm;
+  document.getElementById('results-area').innerHTML = '<div class="no-results"><div class="big">🔍</div>Enter a search term and press Search</div>';
+  setTimeout(()=>inp.focus(),80);
+}
+
+function goBackToSearch(){ showPage('search-page'); }
+
+async function doSearch(){
+  const term = document.getElementById('search-input').value.trim();
+  lastTerm = term;
+  if(!term) return;
+  showLoading(true);
+  try{
+    const res = await fetch(`/api/search?mode=${currentMode}&q=${encodeURIComponent(term)}`);
+    const data = await res.json();
+    renderResults(data);
+  } catch(e){
+    document.getElementById('results-area').innerHTML = '<div class="no-results"><div class="big">⚠️</div>Search failed — please try again.</div>';
+  }
+  showLoading(false);
+}
+
+function renderResults(results){
+  const area = document.getElementById('results-area');
+  if(!results.length){
+    area.innerHTML='<div class="no-results"><div class="big">😕</div>No customers found.</div>';
+    return;
+  }
+  let html = `<div class="results-count">Showing <strong>${results.length}</strong> result${results.length!==1?'s':''}</div>`;
+  html += `<table class="results-table"><thead><tr>
+    <th>Cust #</th><th>Name / Contact</th><th>Address</th><th>Phone</th><th>Balance</th><th>Orders</th>
+  </tr></thead><tbody>`;
+  results.forEach(c=>{
+    const bal = c.balance||0;
+    const balStr = `<span style="color:${bal>0?'var(--green)':bal<0?'var(--red)':'var(--text3)'}">$${Math.abs(bal).toFixed(2)}</span>`;
+    html += `<tr class="result-row" onclick="openCustomer('${esc(c.cseq)}')">
+      <td><span class="cnum">#${esc(c.cnumber)}</span></td>
+      <td><strong>${esc(c.display_name)}</strong>${c.company?`<br><span style="font-size:11px;color:var(--text3)">${esc(c.company)}</span>`:''}
+      </td>
+      <td style="color:var(--text2);font-size:13px">${esc(c.addr)}</td>
+      <td style="color:var(--text3);font-size:13px;font-family:monospace">${esc(c.phone)}</td>
+      <td>${balStr}</td>
+      <td style="color:var(--text2)">${c.order_count}</td>
+    </tr>`;
+  });
+  html += '</tbody></table>';
+  area.innerHTML = html;
+}
+
+async function openCustomer(cseq){
+  showLoading(true);
+  try{
+    const res = await fetch(`/api/customer/${encodeURIComponent(cseq)}`);
+    const data = await res.json();
+    renderCustomer(data.customer, data.orders, data.items, data.history||[]);
+    showPage('customer-page');
+  } catch(e){
+    alert('Could not load customer.');
+  }
+  showLoading(false);
+}
+
+function renderCustomer(c, custOrders, custItems, custHistory){
+  const displayName = c.ccontac || c.cname || '(No Name)';
+  const fullAddr = [c.caddr1, c.caddr2].filter(Boolean).join(' ');
+  const cityStateZip = [c.ccity, c.cstate, c.czip].filter(Boolean).join(', ');
+
+  // ── Live financial calcs ──
+  const now = new Date();
+  const thisYr = now.getFullYear();
+  const thisMo = String(now.getMonth()+1).padStart(2,'0');
+  const charges = custOrders.filter(o=>o.oamount>0);
+  const payItems = custItems.filter(i=>i.exprice<0);
+  const moSales = charges.filter(o=>o.oorderdate&&o.oorderdate.startsWith(`${thisYr}-${thisMo}`)).reduce((s,o)=>s+o.oamount,0);
+  const yrSales = charges.filter(o=>o.oorderdate&&o.oorderdate.startsWith(String(thisYr))).reduce((s,o)=>s+o.oamount,0);
+  const totCharged = charges.reduce((s,o)=>s+o.oamount,0);
+  const totPaid = payItems.reduce((s,i)=>s+Math.abs(i.exprice),0);
+  const calcBal = totCharged - totPaid;
+
+  let html = `
+  <div class="customer-header">
+    <div>
+      <div class="customer-number">Customer #${esc(c.cnumber)}</div>
+      <div class="customer-name">${esc(displayName)}</div>
+      ${c.ccompany?`<div style="color:var(--text2);font-size:14px;margin-bottom:14px;">🏢 ${esc(c.ccompany)}</div>`:''}
+      <div class="contact-grid">
+        ${fullAddr?`<div class="contact-item"><span class="label">Address</span><span class="val">${esc(fullAddr)}${cityStateZip?`<br>${esc(cityStateZip)}`:''}</span></div>`:''}
+        ${c.cphone?`<div class="contact-item"><span class="label">Phone</span><span class="val">${esc(c.cphone)}</span></div>`:''}
+        ${c.cphone2?`<div class="contact-item"><span class="label">Phone 2</span><span class="val">${esc(c.cphone2)}</span></div>`:''}
+        ${c.cphone3?`<div class="contact-item"><span class="label">Phone 3</span><span class="val">${esc(c.cphone3)}</span></div>`:''}
+        ${c.cemail?`<div class="contact-item"><span class="label">Email</span><span class="val">${esc(c.cemail)}</span></div>`:''}
+        ${c.clconta?`<div class="contact-item"><span class="label">Last Contact</span><span class="val">${esc(c.clconta)}</span></div>`:''}
+        ${c.cfirstdate?`<div class="contact-item"><span class="label">First Service</span><span class="val">${esc(c.cfirstdate)}</span></div>`:''}
+      </div>
+    </div>
+    <div style="text-align:right;flex-shrink:0">
+      ${c.cflag?`<div style="font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--accent);background:rgba(244,163,10,.1);border:1px solid rgba(244,163,10,.3);padding:4px 12px;border-radius:20px;margin-bottom:10px;display:inline-block">${esc(c.cflag)}</div><br>`:''}
+      ${c.cterms?`<div style="font-size:13px;color:var(--text2);margin-top:6px">Terms: <strong>${esc(c.cterms)}</strong></div>`:''}
+      ${c.ccampai?`<div style="font-size:13px;color:var(--text2);margin-top:4px">Campaign: <strong>${esc(c.ccampai)}</strong></div>`:''}
+    </div>
+  </div>
+
+  <div class="stats-row">
+    <div class="stat-box"><div class="stat-label">This Month</div><div class="stat-value money">$${moSales.toFixed(2)}</div></div>
+    <div class="stat-box"><div class="stat-label">${thisYr} Sales</div><div class="stat-value money">$${yrSales.toFixed(2)}</div></div>
+    <div class="stat-box"><div class="stat-label">Balance</div><div class="stat-value ${calcBal<=0.01?'money':'warn'}">$${calcBal.toFixed(2)}</div></div>
+    <div class="stat-box"><div class="stat-label">Total Orders</div><div class="stat-value">${custOrders.length}</div></div>
+  </div>
+
+  <div class="tabs">
+    <button class="tab-btn active" onclick="switchTab('orders',this)">📋 Orders (${custOrders.length})</button>
+    <button class="tab-btn" onclick="switchTab('notes',this)">📝 Notes & History</button>
+    <button class="tab-btn" onclick="switchTab('financial',this)">💰 Financial</button>
+  </div>
+
+  <!-- ORDERS TAB -->
+  <div class="tab-panel active" id="tab-orders">`;
+
+  if(!custOrders.length){
+    html += '<div class="empty-state">No orders found for this customer.</div>';
+  } else {
+    const sorted = [...custOrders].sort((a,b)=>(b.oorderdate||'').localeCompare(a.oorderdate||''));
+    const itemsByOrder = {};
+    custItems.forEach(it=>{
+      const k = String(it.exonumber);
+      if(!itemsByOrder[k]) itemsByOrder[k]=[];
+      itemsByOrder[k].push(it);
+    });
+
+    html += `<div class="orders-col-header">
+      <span></span><span>Order #</span><span>Order Date</span><span>Tech</span>
+      <span>Amount</span><span>Paid</span><span>Service</span><span>Time</span>
+    </div>`;
+
+    sorted.forEach((o,idx)=>{
+      const oi = itemsByOrder[String(o.onumber)]||[];
+      const hasItems = oi.length>0;
+      const gid = 'og_'+idx;
+      const amtColor = o.oamount>0?'var(--green)':o.oamount<0?'var(--red)':'var(--text3)';
+      const paidColor = o.oamtpaid<0?'var(--green)':'var(--text3)';
+
+      html += `<div class="order-group">
+        <div class="order-header-row ${hasItems?'':'no-items'}" onclick="toggleOrder('${gid}',${hasItems})">
+          <div class="chevron">${hasItems?'▶':'·'}</div>
+          <div class="oh-cell order-num">${esc(o.onumber)}${hasItems?`<span class="order-item-count">${oi.length}</span>`:''}</div>
+          <div class="oh-cell order-date">${esc(o.oorderdate)||'—'}</div>
+          <div class="oh-cell">${o.otech?`<span class="otech">${esc(o.otech)}</span>`:'<span style="color:var(--text3)">—</span>'}</div>
+          <div class="oh-cell" style="color:${amtColor};font-weight:600">$${o.oamount.toFixed(2)}</div>
+          <div class="oh-cell" style="color:${paidColor}">$${Math.abs(o.oamtpaid).toFixed(2)}</div>
+          <div class="oh-cell order-svc">${esc(o.ocomment||'')}</div>
+          <div class="oh-cell order-time">${esc(o.otimecomment||'')}</div>
+        </div>`;
+
+      if(hasItems){
+        html += `<div class="items-drawer" id="${gid}">`;
+        oi.forEach(it=>{
+          const pc = it.exprice>0?'pos':it.exprice<0?'neg':'zero';
+          const ps = it.exprice>=0?`+$${it.exprice.toFixed(2)}`:`-$${Math.abs(it.exprice).toFixed(2)}`;
+          html += `<div class="drawer-item">
+            <div class="di-date">${esc(it.exorder||'')}</div>
+            <div class="di-type">${esc(it.extype||'')}</div>
+            <div class="di-desc">${esc(it.exseria||'')}</div>
+            <div class="di-price ${pc}">${ps}</div>
+          </div>`;
+        });
+        html += `</div>`;
+      }
+      html += `</div>`;
+    });
+  }
+
+  // NOTES TAB
+  const histories = [c.chistory1,c.chistory2,c.chistory3,c.chistory4,c.chistory5,
+                     c.chistory6,c.chistory7,c.chistory8,c.chistory9,c.chistory10].filter(Boolean);
+  html += `</div><div class="tab-panel" id="tab-notes">`;
+
+  if(custHistory && custHistory.length){
+    html += `<div class="section-sub">History Log (${custHistory.length})</div>`;
+    html += `<table style="width:100%;border-collapse:separate;border-spacing:0 4px;margin-bottom:18px">
+      <thead><tr>
+        <th style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:4px 14px;text-align:left;border-bottom:1px solid var(--border)">Date</th>
+        <th style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:4px 14px;text-align:left;border-bottom:1px solid var(--border)">User</th>
+        <th style="font-family:'Barlow Condensed',sans-serif;font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);padding:4px 14px;text-align:left;border-bottom:1px solid var(--border)">Note</th>
+      </tr></thead><tbody>`;
+    custHistory.forEach(h=>{
+      html += `<tr>
+        <td style="padding:10px 14px;font-size:12px;color:var(--text3);background:var(--bg2);border-radius:6px 0 0 6px;white-space:nowrap">${esc(h.hdate||'')}</td>
+        <td style="padding:10px 14px;font-size:12px;font-family:'Barlow Condensed',sans-serif;font-weight:700;letter-spacing:1px;color:var(--accent);background:var(--bg2)">${esc(h.huser||'')}</td>
+        <td style="padding:10px 14px;font-size:13px;color:var(--text2);background:var(--bg2);border-radius:0 6px 6px 0">${esc(h.hnote||'')}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+  }
+
+  if(histories.length){
+    html += `<div class="section-sub">Legacy History Notes</div><div class="notes-grid">`;
+    histories.forEach(h=>{ html += `<div class="note-item">${esc(h)}</div>`; });
+    html += `</div>`;
+  }
+  if(c.ccomment){
+    html += `<div class="section-sub">Customer Comment</div><div class="comment-box">${esc(c.ccomment)}</div>`;
+  }
+  if(!custHistory.length&&!histories.length&&!c.ccomment){
+    html += '<div class="empty-state">No notes or history on file.</div>';
+  }
+
+  // FINANCIAL TAB
+  const lastYr = thisYr-1;
+  const lastYrSales = charges.filter(o=>o.oorderdate&&o.oorderdate.startsWith(String(lastYr))).reduce((s,o)=>s+o.oamount,0);
+  const avgOrder = charges.length>0?totCharged/charges.length:0;
+  const highOrder = charges.length>0?Math.max(...charges.map(o=>o.oamount)):0;
+  const sortedPay = [...payItems].filter(i=>i.expayda).sort((a,b)=>b.expayda.localeCompare(a.expayda));
+  const lastPay = sortedPay[0]||null;
+  const sortedOrd = [...custOrders].filter(o=>o.oorderdate).sort((a,b)=>b.oorderdate.localeCompare(a.oorderdate));
+  const lastOrdDate = sortedOrd[0]?sortedOrd[0].oorderdate:'—';
+  const firstOrdDate = sortedOrd.length?sortedOrd[sortedOrd.length-1].oorderdate:'—';
+  const balColor = calcBal<=0.01?'var(--green)':calcBal<50?'var(--accent)':'var(--red)';
+  const payByType = {};
+  payItems.forEach(i=>{ const t=i.extype||'OTHER'; payByType[t]=(payByType[t]||0)+Math.abs(i.exprice); });
+  const payTypeRows = Object.entries(payByType).sort((a,b)=>b[1]-a[1]);
+
+  html += `</div><div class="tab-panel" id="tab-financial">
+    <div class="fin-grid-3">
+      <div class="stat-box" style="border-color:rgba(34,197,94,.3)"><div class="stat-label">Total Charged (All Time)</div><div class="stat-value money">$${totCharged.toFixed(2)}</div></div>
+      <div class="stat-box" style="border-color:rgba(34,197,94,.3)"><div class="stat-label">Total Paid (All Time)</div><div class="stat-value money">$${totPaid.toFixed(2)}</div></div>
+      <div class="stat-box" style="border-color:${calcBal>0.01?'rgba(239,68,68,.3)':'rgba(34,197,94,.3)'}"><div class="stat-label">Calculated Balance</div><div class="stat-value" style="color:${balColor}">$${calcBal.toFixed(2)}</div></div>
+      <div class="stat-box"><div class="stat-label">${thisYr} Sales</div><div class="stat-value money">$${yrSales.toFixed(2)}</div></div>
+      <div class="stat-box"><div class="stat-label">${lastYr} Sales</div><div class="stat-value" style="color:var(--text2)">$${lastYrSales.toFixed(2)}</div></div>
+      <div class="stat-box"><div class="stat-label">Avg Order Value</div><div class="stat-value warn">$${avgOrder.toFixed(2)}</div></div>
+      <div class="stat-box"><div class="stat-label">Total Orders</div><div class="stat-value">${custOrders.length}</div></div>
+      <div class="stat-box"><div class="stat-label">Largest Single Order</div><div class="stat-value warn">$${highOrder.toFixed(2)}</div></div>
+      <div class="stat-box"><div class="stat-label">Total Payments</div><div class="stat-value">${payItems.length}</div></div>
+    </div>
+    <div class="fin-grid-2">
+      <div class="stat-box"><div class="stat-label">Last Payment Date</div><div class="stat-value" style="font-size:20px">${lastPay?esc(lastPay.expayda):'—'}</div>${lastPay&&lastPay.extype?`<div style="font-size:11px;color:var(--text3);margin-top:4px;font-family:'Barlow Condensed',sans-serif;letter-spacing:1px;text-transform:uppercase">${esc(lastPay.extype)}</div>`:''}</div>
+      <div class="stat-box"><div class="stat-label">Last Payment Amount</div><div class="stat-value money" style="font-size:24px">$${lastPay?Math.abs(lastPay.exprice).toFixed(2):'0.00'}</div></div>
+      <div class="stat-box"><div class="stat-label">First Service Date</div><div class="stat-value" style="font-size:20px">${firstOrdDate}</div></div>
+      <div class="stat-box"><div class="stat-label">Most Recent Order</div><div class="stat-value" style="font-size:20px">${lastOrdDate}</div></div>
+    </div>`;
+
+  if(payTypeRows.length){
+    html += `<div class="section-sub">Payment Methods</div><div class="pay-methods">`;
+    payTypeRows.forEach(([type,amt])=>{
+      html += `<div class="pay-chip"><div class="pay-chip-label">${esc(type)}</div><div class="pay-chip-val">$${amt.toFixed(2)}</div></div>`;
+    });
+    html += `</div>`;
+  }
+  html += `</div>`;
+
+  document.getElementById('customer-detail').innerHTML = html;
+}
+
+function toggleOrder(id, hasItems){
+  if(!hasItems) return;
+  const drawer = document.getElementById(id);
+  const header = drawer&&drawer.previousElementSibling;
+  if(!drawer||!header) return;
+  const open = drawer.classList.contains('open');
+  drawer.classList.toggle('open',!open);
+  header.classList.toggle('expanded',!open);
+}
+
+function switchTab(name, btn){
+  document.querySelectorAll('.tab-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  btn.classList.add('active');
+}
+
+function esc(s){
+  if(s===null||s===undefined) return '';
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+</script>
+<div style="position:fixed;bottom:0;left:0;right:0;background:#1a1005;color:#fbbf24;text-align:center;padding:10px;font-size:12px;border-top:1px solid #78350f;z-index:999;font-family:'Barlow',sans-serif;">
+  ⚠ DEMO — every customer, order, and figure on this page is randomly generated placeholder data, not real customer information. Upload and sign-out are disabled in this demo.
+</div>
+</body>
+</html>
