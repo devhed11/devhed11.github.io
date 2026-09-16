@@ -37,6 +37,14 @@
   .no-data-banner p{font-size:14px;color:var(--text2);line-height:1.6;margin-bottom:12px;}
   .no-data-banner a{display:inline-block;background:var(--accent);color:#0f1117;border-radius:8px;padding:10px 24px;font-family:'Barlow Condensed',sans-serif;font-weight:700;font-size:14px;letter-spacing:1px;text-transform:uppercase;text-decoration:none;}
 
+  /* SUGGESTIONS */
+  .suggest-wrap{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:600px;margin-top:4px;}
+  .suggest-label{font-family:'Barlow Condensed',sans-serif;font-size:11px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--text3);width:100%;text-align:center;margin-bottom:4px;}
+  .suggest-chip{background:var(--bg2);border:1.5px solid var(--border);color:var(--text2);font-size:12px;padding:6px 14px;border-radius:20px;cursor:pointer;transition:.15s;font-family:'Barlow',sans-serif;}
+  .suggest-chip:hover{border-color:var(--accent);color:var(--accent);background:var(--bg3)}
+  .search-suggest-wrap{display:flex;flex-wrap:wrap;align-items:center;gap:8px;margin:-16px 0 26px;}
+  .search-suggest-wrap .suggest-label{width:auto;text-align:left;margin-bottom:0;}
+
   /* SEARCH CARDS */
   .search-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;max-width:760px;width:100%;margin-bottom:40px;}
   .search-card{background:var(--bg2);border:1.5px solid var(--border);border-radius:12px;padding:28px 20px 24px;cursor:pointer;transition:.2s;display:flex;flex-direction:column;align-items:center;gap:12px;}
@@ -197,6 +205,7 @@
     </div>
   </div>
   <div class="home-stats">✅ 7,800 customers · 61,400 orders · 148,200 line items</div>
+  <div class="suggest-wrap" id="home-suggest"></div>
 </div>
 
 <!-- SEARCH -->
@@ -211,6 +220,7 @@
       onkeydown="if(event.key==='Enter')doSearch()">
     <button class="search-go-btn" onclick="doSearch()">Search</button>
   </div>
+  <div class="search-suggest-wrap" id="search-suggest"></div>
   <div id="results-area">
     <div class="no-results"><div class="big">🔍</div>Enter a search term and press Search</div>
   </div>
@@ -303,6 +313,17 @@
     }
   });
 
+  function sample(arr, n){
+    const copy = arr.slice(), out = [];
+    for (let i=0;i<n && copy.length;i++) out.push(copy.splice(irand(0,copy.length-1),1)[0]);
+    return out;
+  }
+  window.DEMO_SUGGEST = {
+    name: sample(CUSTOMERS,4).map(c=>c.ccontac),
+    number: sample(CUSTOMERS,4).map(c=>c.cnumber),
+    address: sample(CUSTOMERS,4).map(c=>c.caddr1),
+  };
+
   function matches(c, mode, needle){
     if (mode === 'number') return c.cnumber.toLowerCase().includes(needle);
     if (mode === 'name') return (c.ccontac||'').toLowerCase().includes(needle) || (c.cname||'').toLowerCase().includes(needle) || (c.ccompany||'').toLowerCase().includes(needle);
@@ -351,9 +372,41 @@ function showPage(id){
   document.getElementById(id).classList.add('active');
 }
 
+function chip(mode, query, label){
+  const q = String(query).replace(/'/g,"\\'");
+  return `<button type="button" class="suggest-chip" onclick="trySuggestion('${mode}','${q}')">${esc(label)}</button>`;
+}
+
+function trySuggestion(mode, query){
+  showSearch(mode);
+  document.getElementById('search-input').value = query;
+  doSearch();
+}
+
+function renderHomeSuggestions(){
+  const s = window.DEMO_SUGGEST, el = document.getElementById('home-suggest');
+  if(!s || !el) return;
+  let html = '<div class="suggest-label">Not sure what to search? Try one of these</div>';
+  html += s.name.slice(0,2).map(v=>chip('name', v, v)).join('');
+  html += s.number.slice(0,2).map(v=>chip('number', v, '#'+v)).join('');
+  html += s.address.slice(0,2).map(v=>chip('address', v, v)).join('');
+  el.innerHTML = html;
+}
+
+function renderSearchSuggestions(mode){
+  const s = window.DEMO_SUGGEST, el = document.getElementById('search-suggest');
+  if(!s || !el) return;
+  const list = s[mode] || [];
+  const labelFor = mode==='number' ? (v=>'#'+v) : (v=>v);
+  let html = '<span class="suggest-label">Try:</span>';
+  html += list.map(v=>chip(mode, v, labelFor(v))).join('');
+  el.innerHTML = html;
+}
+
 function showHome(){
   showPage('home');
   setNavActive('nav-home');
+  renderHomeSuggestions();
 }
 
 function showSearch(mode){
@@ -367,6 +420,7 @@ function showSearch(mode){
   const inp = document.getElementById('search-input');
   inp.placeholder = ph[mode];
   inp.value = lastTerm;
+  renderSearchSuggestions(mode);
   document.getElementById('results-area').innerHTML = '<div class="no-results"><div class="big">🔍</div>Enter a search term and press Search</div>';
   setTimeout(()=>inp.focus(),80);
 }
@@ -639,6 +693,8 @@ function esc(s){
   if(s===null||s===undefined) return '';
   return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
 }
+
+renderHomeSuggestions();
 </script>
 <div style="position:fixed;bottom:0;left:0;right:0;background:#1a1005;color:#fbbf24;text-align:center;padding:10px;font-size:12px;border-top:1px solid #78350f;z-index:999;font-family:'Barlow',sans-serif;">
   ⚠ DEMO — every customer, order, and figure on this page is randomly generated placeholder data, not real customer information. Upload and sign-out are disabled in this demo.
