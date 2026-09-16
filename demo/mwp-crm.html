@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Midwest CRM Demo</title>
+<style>
+  :root{
+    --bg:#0a0e14; --surface:#11161f; --surface-2:#161d29; --border:#232c3d;
+    --ink:#e9edf5; --ink-soft:#8791a5; --accent:#f5a623; --good:#34d399;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',sans-serif;padding-bottom:52px;}
+  header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;}
+  .brand{font-weight:800;font-size:1.2rem;letter-spacing:0.02em;}
+  .brand .pc{color:var(--accent);}
+  nav{display:flex;gap:18px;font-size:0.82rem;color:var(--ink-soft);}
+  nav a{cursor:pointer;padding:6px 2px;border-bottom:2px solid transparent;}
+  nav a.active{color:var(--accent);border-color:var(--accent);}
+  .wrap{padding:28px;max-width:1100px;margin:0 auto;}
+  .search-box{display:flex;gap:10px;max-width:600px;margin:0 auto 24px;}
+  .search-box input{flex:1;background:var(--surface);border:1px solid var(--border);color:var(--ink);padding:12px 14px;border-radius:6px;font-size:0.95rem;}
+  .search-box button{background:var(--accent);border:none;color:#1a1205;font-weight:700;padding:0 20px;border-radius:6px;cursor:pointer;}
+  table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  th{text-align:left;padding:9px 10px;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--border);}
+  td{padding:9px 10px;border-bottom:1px solid var(--surface-2);}
+  tr.res-row{cursor:pointer;}
+  tr.res-row:hover{background:var(--surface-2);}
+  .cust-id{color:var(--accent);font-weight:600;}
+  .modal-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);align-items:flex-start;justify-content:center;padding:40px 20px;overflow:auto;z-index:5;}
+  .modal-backdrop.open{display:flex;}
+  .modal{background:var(--surface);border:1px solid var(--border);border-radius:10px;max-width:760px;width:100%;padding:24px;}
+  .modal h2{margin:0 0 4px;}
+  .modal .sub{color:var(--ink-soft);font-size:0.82rem;margin-bottom:16px;}
+  .info-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;background:var(--surface-2);border-radius:8px;padding:14px;margin-bottom:16px;font-size:0.8rem;}
+  .info-row div span{display:block;color:var(--ink-soft);font-size:0.7rem;text-transform:uppercase;margin-bottom:2px;}
+  .stat-tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(110px,1fr));gap:10px;margin-bottom:16px;}
+  .stat-tiles div{background:var(--surface-2);border-radius:8px;padding:12px;}
+  .stat-tiles b{font-size:1.2rem;display:block;color:var(--good);}
+  .stat-tiles span{font-size:0.7rem;color:var(--ink-soft);text-transform:uppercase;}
+  .close-btn{float:right;background:none;border:1px solid var(--border);color:var(--ink-soft);border-radius:6px;padding:6px 12px;cursor:pointer;}
+  .banner{position:fixed;bottom:0;left:0;right:0;background:#1a1005;color:#fbbf24;text-align:center;padding:10px;font-size:0.78rem;border-top:1px solid #78350f;z-index:10;}
+  .panel{display:none;}
+  .panel.active{display:block;}
+  .upload-box{border:2px dashed var(--border);border-radius:10px;padding:50px 20px;text-align:center;color:var(--ink-soft);font-size:0.85rem;}
+  .upload-box button{margin-top:14px;background:var(--accent);border:none;color:#1a1205;font-weight:700;padding:9px 18px;border-radius:6px;cursor:pointer;}
+  .toast{display:none;background:#123528;color:#34d399;padding:10px 14px;border-radius:6px;font-size:0.8rem;margin-top:16px;text-align:center;}
+  .toast.show{display:block;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">MIDWEST <span class="pc">PC</span> CRM</div>
+  <nav id="mainNav">
+    <a class="active" data-p="byname">By Name</a><a data-p="bynumber">By Number</a><a data-p="byaddress">By Address</a><a data-p="upload">Upload Data</a><a onclick="doLogout()">Logout</a>
+  </nav>
+</header>
+
+<div class="wrap">
+  <div class="panel active" id="byname">
+    <div class="search-box">
+      <input id="searchInput" value="smith" placeholder="Search by name...">
+      <button onclick="doSearch('results')">Search</button>
+    </div>
+    <table>
+      <thead><tr><th>Cust #</th><th>Name / Contact</th><th>Address</th><th>Phone</th><th>Orders</th></tr></thead>
+      <tbody id="results"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="bynumber">
+    <div class="search-box">
+      <input id="numberInput" value="38037" placeholder="Search by customer #...">
+      <button onclick="doSearch('resultsNum')">Search</button>
+    </div>
+    <table>
+      <thead><tr><th>Cust #</th><th>Name / Contact</th><th>Address</th><th>Phone</th><th>Orders</th></tr></thead>
+      <tbody id="resultsNum"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="byaddress">
+    <div class="search-box">
+      <input id="addressInput" value="lockett" placeholder="Search by address...">
+      <button onclick="doSearch('resultsAddr')">Search</button>
+    </div>
+    <table>
+      <thead><tr><th>Cust #</th><th>Name / Contact</th><th>Address</th><th>Phone</th><th>Orders</th></tr></thead>
+      <tbody id="resultsAddr"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="upload">
+    <div class="upload-box">
+      Drag a spreadsheet here, or click to choose a file<br>
+      <button onclick="showToast()">Choose File</button>
+    </div>
+    <div class="toast" id="uploadToast">✓ File received (demo — nothing is actually uploaded or stored).</div>
+  </div>
+</div>
+
+<div class="modal-backdrop" id="modalBackdrop" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modalContent"></div>
+</div>
+
+<div class="banner">⚠ DEMO — every name, address, and figure on this page is randomly generated placeholder data, not real customer information.</div>
+
+<script>
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function money(n){ return '$'+n.toLocaleString(); }
+function pick(arr){ return arr[rand(0,arr.length-1)]; }
+
+const firstNames = ['Jordan','Casey','Morgan','Taylor','Riley','Avery','Drew','Reese','Skyler','Cameron','Dakota','Rowan','Emerson','Finley','Harper','Quinn','Sawyer','Blake','Peyton','Hayden'];
+const lastNames = ['Whitfield','Brennan','Okafor','Delgado','Nakamura','Petrov','Alvarado','Lindqvist','Marsh','Falcone','Reyes','Kowalski','Bianchi','Osei','Vance','Doyle','Fontaine','Larkin','Sundberg','Mercer'];
+const streets = ['Windstream Ct','Cloverdale Dr','Robbins Rd','Barbee Ln','Seibert Ave','Liberty Village Dr','Vasel Dr','Lockett Ln','Brown Fox Dr','Connolly Dr'];
+const cities = ['St Peters, MO','Florissant, MO','Ferguson, MO','Kirkwood, MO','Creve Coeur, MO','St Louis, MO'];
+const services = ['Silver Service XP','General Pest Quarterly','Termite Bait Renewal','Mole & Vole Program','Rodent Station Check','Mosquito Package'];
+
+function fakeCustomer(){
+  const name = pick(firstNames)+' '+pick(lastNames);
+  return {
+    id: '#'+rand(10000,99999),
+    name,
+    address: rand(100,9999)+' '+pick(streets)+' '+pick(cities),
+    phone: '(314) 555-'+String(rand(0,9999)).padStart(4,'0'),
+    phone2: '(636) 555-'+String(rand(0,9999)).padStart(4,'0'),
+    email: name.toLowerCase().replace(' ','.')+'@example.com',
+    orders: rand(0,28),
+    thisMonth: money(rand(0,300)),
+    ytdSales: money(rand(150,2400)),
+    balance: money(rand(0,300)),
+    orderHistory: Array.from({length: rand(4,8)}, ()=>({
+      num: rand(1000000,1099999), date: `202${rand(4,6)}-${String(rand(1,12)).padStart(2,'0')}-${String(rand(1,28)).padStart(2,'0')}`,
+      amount: money(rand(40,300)), service: pick(services)
+    }))
+  };
+}
+
+let resultSets = {};
+function doSearch(targetId){
+  const list = Array.from({length: rand(8,14)}, fakeCustomer);
+  resultSets[targetId] = list;
+  document.getElementById(targetId).innerHTML = list.map((c,i)=>`
+    <tr class="res-row" onclick="openCustomer('${targetId}',${i})">
+      <td class="cust-id">${c.id}</td><td>${c.name}</td><td>${c.address}</td><td>${c.phone}</td><td>${c.orders}</td>
+    </tr>
+  `).join('');
+}
+doSearch('results'); doSearch('resultsNum'); doSearch('resultsAddr');
+
+function showToast(){
+  const t = document.getElementById('uploadToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2800);
+}
+function doLogout(){ alert('Demo mode — logout is disabled so you can keep exploring.'); }
+
+document.getElementById('mainNav').addEventListener('click', e=>{
+  const a = e.target.closest('a');
+  if(!a || !a.dataset.p) return;
+  document.querySelectorAll('nav a').forEach(x=>x.classList.remove('active'));
+  a.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  document.getElementById(a.dataset.p).classList.add('active');
+});
+
+function openCustomer(targetId,i){
+  const c = resultSets[targetId][i];
+  document.getElementById('modalContent').innerHTML = `
+    <button class="close-btn" onclick="closeModal()">Close ✕</button>
+    <h2>${c.name}</h2>
+    <div class="sub">${c.id} · Customer since 202${rand(1,4)}</div>
+    <div class="info-row">
+      <div><span>Address</span>${c.address}</div>
+      <div><span>Phone</span>${c.phone}</div>
+      <div><span>Phone 2</span>${c.phone2}</div>
+      <div><span>Email</span>${c.email}</div>
+    </div>
+    <div class="stat-tiles">
+      <div><b>${c.thisMonth}</b><span>This month</span></div>
+      <div><b>${c.ytdSales}</b><span>YTD sales</span></div>
+      <div><b>${c.balance}</b><span>Balance</span></div>
+      <div><b>${c.orders}</b><span>Total orders</span></div>
+    </div>
+    <table><thead><tr><th>Order #</th><th>Date</th><th>Amount</th><th>Service</th></tr></thead>
+      <tbody>${c.orderHistory.map(o=>`<tr><td class="cust-id">${o.num}</td><td>${o.date}</td><td>${o.amount}</td><td>${o.service}</td></tr>`).join('')}</tbody>
+    </table>
+  `;
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+function closeModal(){ document.getElementById('modalBackdrop').classList.remove('open'); }
+</script>
+
+</body>
+</html>

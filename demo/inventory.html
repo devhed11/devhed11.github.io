@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Inventory System Demo</title>
+<style>
+  :root{
+    --bg:#0f1729; --surface:#161f38; --surface-2:#1c2745; --border:#26325a;
+    --ink:#e8ecf7; --ink-soft:#8b96b8; --accent:#5b8def; --good:#34d399; --warn:#fbbf24; --bad:#f87171;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',sans-serif;padding-bottom:52px;}
+  header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .brand{font-weight:700;font-size:1.1rem;color:var(--accent);}
+  .brand span{color:var(--ink-soft);font-weight:400;font-size:0.8rem;display:block;}
+  nav{display:flex;gap:4px;padding:10px 28px;border-bottom:1px solid var(--border);flex-wrap:wrap;}
+  nav button{background:none;border:1px solid var(--border);color:var(--ink-soft);padding:7px 14px;border-radius:6px;font-size:0.8rem;cursor:pointer;}
+  nav button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+  .wrap{padding:20px 28px;max-width:1400px;margin:0 auto;}
+  .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:14px;margin-bottom:22px;}
+  .kpi{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;}
+  .kpi b{font-size:1.4rem;display:block;}
+  .kpi span{font-size:0.76rem;color:var(--ink-soft);}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:18px;margin-bottom:20px;display:none;}
+  .panel.active{display:block;}
+  .panel h3{margin:0 0 14px;font-size:0.85rem;letter-spacing:0.05em;color:var(--ink-soft);text-transform:uppercase;}
+  table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  th{text-align:left;padding:8px 10px;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--border);white-space:nowrap;}
+  td{padding:8px 10px;border-bottom:1px solid var(--surface-2);white-space:nowrap;}
+  .badge{padding:2px 8px;border-radius:100px;font-size:0.72rem;font-weight:600;}
+  .badge.low{background:#3f1d1d;color:var(--bad);}
+  .badge.ok{background:#123528;color:var(--good);}
+  .badge.mid{background:#3f3418;color:var(--warn);}
+  tr.tech-row, tr.item-row{cursor:pointer;}
+  tr.tech-row:hover, tr.item-row:hover{background:var(--surface-2);}
+  .detail{display:none;background:var(--surface-2);}
+  .detail.open{display:table-row;}
+  .detail-inner{padding:12px 20px;display:flex;flex-wrap:wrap;gap:10px;}
+  .chip{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:6px 12px;font-size:0.76rem;}
+  .banner{position:fixed;bottom:0;left:0;right:0;background:#1a1005;color:#fbbf24;text-align:center;padding:10px;font-size:0.78rem;border-top:1px solid #78350f;z-index:10;}
+  .form-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-bottom:16px;}
+  .form-grid label{display:block;font-size:0.72rem;color:var(--ink-soft);text-transform:uppercase;margin-bottom:5px;}
+  .form-grid select, .form-grid input{width:100%;background:var(--surface-2);border:1px solid var(--border);color:var(--ink);padding:8px 10px;border-radius:6px;font-size:0.82rem;}
+  .btn{background:var(--accent);border:none;color:#fff;padding:9px 18px;border-radius:6px;font-size:0.82rem;cursor:pointer;font-weight:600;}
+  .toast{display:none;background:#123528;color:var(--good);padding:10px 14px;border-radius:6px;font-size:0.8rem;margin-top:12px;}
+  .toast.show{display:block;}
+  .subtabs{display:flex;gap:6px;margin-bottom:14px;}
+  .subtabs button{background:var(--surface-2);border:1px solid var(--border);color:var(--ink-soft);padding:6px 12px;border-radius:100px;font-size:0.74rem;cursor:pointer;}
+  .subtabs button.active{background:var(--accent);color:#fff;border-color:var(--accent);}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Meridian Pest &amp; Wildlife <span>Inventory Management</span></div>
+  <div style="font-size:0.8rem;color:var(--ink-soft);">Demo Admin</div>
+</header>
+
+<nav id="mainNav">
+  <button class="active" data-p="dash">Dashboard</button>
+  <button data-p="items">Items</button>
+  <button data-p="warehouse">Warehouse</button>
+  <button data-p="trucks">Trucks</button>
+  <button data-p="receive">Receive</button>
+  <button data-p="transfer">Transfer</button>
+  <button data-p="audit">Audit</button>
+  <button data-p="reports">Reports</button>
+  <button data-p="setup">Setup</button>
+</nav>
+
+<div class="wrap">
+  <div class="panel active" id="dash">
+    <div class="kpis" id="kpis"></div>
+    <h3 style="margin-top:6px;">Warehouse Stock — Low/Reorder Alerts</h3>
+    <table><thead><tr><th>Product</th><th>On Hand</th><th>Reorder At</th><th>Status</th></tr></thead>
+      <tbody id="stockTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="items">
+    <h3>All Products — click a product for detail</h3>
+    <table><thead><tr><th>Product</th><th>Category</th><th>Cost/Unit</th><th>On Hand</th></tr></thead>
+      <tbody id="itemsTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="warehouse">
+    <div class="subtabs" id="whSub">
+      <button class="active" data-w="Main">Main Warehouse</button>
+      <button data-w="Overflow">Overflow Storage</button>
+    </div>
+    <h3>Inventory by Warehouse</h3>
+    <table><thead><tr><th>Product</th><th>Quantity</th><th>Value</th></tr></thead>
+      <tbody id="warehouseTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="trucks">
+    <h3>Technician Trucks — click a tech to see their load</h3>
+    <table><thead><tr><th>Tech</th><th>Truck #</th><th>Items Carried</th><th>Truck Value</th></tr></thead>
+      <tbody id="trucksTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="receive">
+    <h3>Receive Stock</h3>
+    <div class="form-grid">
+      <div><label>Product</label><select id="recvProduct"></select></div>
+      <div><label>Quantity</label><input type="number" value="24"></div>
+      <div><label>Location</label><select><option>Main Warehouse</option><option>Overflow Storage</option></select></div>
+    </div>
+    <button class="btn" onclick="showToast('receiveToast')">Receive Stock</button>
+    <div class="toast" id="receiveToast">✓ Stock received and added to warehouse inventory (demo — not saved).</div>
+  </div>
+
+  <div class="panel" id="transfer">
+    <h3>Transfer — Warehouse → Truck</h3>
+    <div class="form-grid">
+      <div><label>Product</label><select id="transferProduct"></select></div>
+      <div><label>Quantity</label><input type="number" value="6"></div>
+      <div><label>Technician</label><select id="transferTech"></select></div>
+    </div>
+    <button class="btn" onclick="showToast('transferToast')">Transfer</button>
+    <div class="toast" id="transferToast">✓ Transferred to truck inventory (demo — not saved).</div>
+  </div>
+
+  <div class="panel" id="audit">
+    <h3>Inventory Audit — Counted vs Expected</h3>
+    <table><thead><tr><th>Product</th><th>Expected</th><th>Counted</th><th>Variance</th></tr></thead>
+      <tbody id="auditTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="reports">
+    <div class="subtabs">
+      <button class="active">By Tech</button><button>By Product</button><button>Raw Transactions</button>
+    </div>
+    <h3>Usage Report — Cost per Job</h3>
+    <table><thead><tr><th>Tech</th><th>Jobs</th><th>Product Cost</th><th>Cost/Job</th></tr></thead>
+      <tbody id="reportsTable"></tbody>
+    </table>
+  </div>
+
+  <div class="panel" id="setup">
+    <h3>Setup — Technicians</h3>
+    <table><thead><tr><th>Tech</th><th>Truck #</th><th>Active</th></tr></thead>
+      <tbody id="setupTable"></tbody>
+    </table>
+  </div>
+</div>
+
+<div class="banner">⚠ DEMO — every name and figure on this page is randomly generated placeholder data, not real business information.</div>
+
+<script>
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function money(n){ return '$'+n.toLocaleString(); }
+function pick(arr){ return arr[rand(0,arr.length-1)]; }
+
+const products = ['General Insecticide Concentrate','Rodent Bait Blocks','Termiticide Foam','Glue Boards','Mosquito Larvicide','Ant Bait Gel','Wasp Freeze Spray','Exclusion Mesh Roll','Bait Stations (Bulk)','Dust Applicator Refill'];
+const techs = ['Jordan Whitfield','Casey Brennan','Morgan Okafor','Taylor Delgado','Riley Nakamura','Avery Petrov','Drew Alvarado','Reese Lindqvist','Skyler Mercer','Cameron Vance'];
+
+const kpis = [
+  {v: rand(35,60), l:'Active products'},
+  {v: rand(1,6), l:'Low-stock alerts'},
+  {v: money(rand(18000,42000)), l:'Warehouse value'},
+  {v: money(rand(6000,15000)), l:'Truck value (total)'},
+];
+document.getElementById('kpis').innerHTML = kpis.map(k=>`<div class="kpi"><b>${k.v}</b><span>${k.l}</span></div>`).join('');
+
+const stock = products.slice(0,6).map(p=>{
+  const onHand = rand(2,80), reorder = rand(10,30);
+  const status = onHand < reorder*0.4 ? 'low' : onHand < reorder ? 'mid' : 'ok';
+  const label = status==='low'?'Reorder now':status==='mid'?'Getting low':'In stock';
+  return {p, onHand, reorder, status, label};
+});
+document.getElementById('stockTable').innerHTML = stock.map(s=>`
+  <tr><td>${s.p}</td><td>${s.onHand}</td><td>${s.reorder}</td><td><span class="badge ${s.status}">${s.label}</span></td></tr>
+`).join('');
+
+const itemData = products.map(p=>({p, cost:(rand(8,60)+rand(0,99)/100).toFixed(2), qty: rand(3,90)}));
+document.getElementById('itemsTable').innerHTML = itemData.map((it,i)=>`
+  <tr class="item-row" onclick="toggleDetail('item',${i})"><td>▸ ${it.p}</td><td>Chemical</td><td>$${it.cost}</td><td>${it.qty}</td></tr>
+  <tr class="detail" id="detail-item-${i}"><td colspan="4"><div class="detail-inner">
+    <div class="chip">FR product ID: ${rand(1000,9999)}</div>
+    <div class="chip">Conversion: 1 case = ${rand(4,12)} units</div>
+    <div class="chip">Last received: 202${rand(4,6)}-0${rand(1,9)}-1${rand(0,9)}</div>
+  </div></td></tr>
+`).join('');
+
+function renderWarehouse(loc){
+  document.getElementById('warehouseTable').innerHTML = products.map(p=>{
+    const qty = loc==='Main'? rand(5,80): rand(0,40);
+    return `<tr><td>${p}</td><td>${qty}</td><td class="money-ish">${money(qty*rand(8,40))}</td></tr>`;
+  }).join('');
+}
+renderWarehouse('Main');
+document.getElementById('whSub').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#whSub button').forEach(b=>b.classList.remove('active'));
+  e.target.classList.add('active');
+  renderWarehouse(e.target.dataset.w);
+});
+
+const truckData = techs.map((name,i)=>{
+  const items = rand(6,14), value = rand(400,1800);
+  return {name, truck: 'Truck '+(10+i), items, value,
+    load: products.slice().sort(()=>Math.random()-0.5).slice(0,4).map(p=>({p, qty: rand(1,20)}))
+  };
+});
+document.getElementById('trucksTable').innerHTML = truckData.map((t,i)=>`
+  <tr class="tech-row" onclick="toggleDetail('truck',${i})"><td>▸ ${t.name}</td><td>${t.truck}</td><td>${t.items}</td><td>${money(t.value)}</td></tr>
+  <tr class="detail" id="detail-truck-${i}"><td colspan="4"><div class="detail-inner">
+    ${t.load.map(l=>`<div class="chip">${l.p} — ${l.qty}</div>`).join('')}
+  </div></td></tr>
+`).join('');
+
+function toggleDetail(kind,i){ document.getElementById(`detail-${kind}-${i}`).classList.toggle('open'); }
+
+document.getElementById('recvProduct').innerHTML = products.map(p=>`<option>${p}</option>`).join('');
+document.getElementById('transferProduct').innerHTML = products.map(p=>`<option>${p}</option>`).join('');
+document.getElementById('transferTech').innerHTML = techs.map(t=>`<option>${t}</option>`).join('');
+
+function showToast(id){
+  const t = document.getElementById(id);
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+document.getElementById('auditTable').innerHTML = products.slice(0,7).map(p=>{
+  const exp = rand(10,60), counted = exp + rand(-4,4);
+  return `<tr><td>${p}</td><td>${exp}</td><td>${counted}</td><td style="color:${counted===exp?'var(--good)':'var(--warn)'}">${counted-exp>0?'+':''}${counted-exp}</td></tr>`;
+}).join('');
+
+document.getElementById('reportsTable').innerHTML = techs.map(t=>{
+  const jobs = rand(20,60), cost = rand(200,900);
+  return `<tr><td>${t}</td><td>${jobs}</td><td>${money(cost)}</td><td>$${(cost/jobs).toFixed(2)}</td></tr>`;
+}).join('');
+
+document.getElementById('setupTable').innerHTML = techs.map((t,i)=>`
+  <tr><td>${t}</td><td>Truck ${10+i}</td><td><span class="badge ok">Active</span></td></tr>
+`).join('');
+
+document.getElementById('mainNav').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(e.target.dataset.p).classList.add('active');
+});
+</script>
+
+</body>
+</html>

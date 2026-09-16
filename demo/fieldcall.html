@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FieldCall Demo</title>
+<style>
+  :root{
+    --bg:#0a0e14; --surface:#111722; --surface-2:#171f2c; --border:#232d3f;
+    --ink:#e9edf5; --ink-soft:#8791a5; --accent:#ff6b35; --good:#34d399;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,'Segoe UI',sans-serif;padding-bottom:52px;}
+  header{padding:16px 28px;border-bottom:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;}
+  .brand{font-weight:800;font-size:1.15rem;}
+  .brand .call{color:var(--accent);}
+  .tabs{display:flex;gap:8px;padding:14px 28px 0;}
+  .tabs button{background:var(--surface);border:1px solid var(--border);color:var(--ink-soft);padding:8px 16px;border-radius:8px 8px 0 0;font-size:0.82rem;cursor:pointer;}
+  .tabs button.active{background:var(--surface-2);color:var(--ink);border-bottom-color:var(--surface-2);}
+  .layout{display:grid;grid-template-columns:1.4fr 1fr;gap:0;max-width:1300px;margin:0 auto;min-height:60vh;}
+  .col-left{padding:20px 28px;border-right:1px solid var(--border);}
+  .col-right{padding:20px 24px;background:var(--surface);}
+  .call-group{margin-bottom:22px;}
+  .call-group h4{margin:0 0 8px;font-size:0.9rem;}
+  .call-meta{font-size:0.72rem;color:var(--ink-soft);margin-bottom:8px;}
+  .pill{display:inline-block;background:var(--surface-2);border:1px solid var(--border);border-radius:100px;padding:4px 10px;font-size:0.74rem;margin:0 6px 6px 0;cursor:pointer;}
+  .pill.active{border-color:var(--accent);color:var(--accent);}
+  .participant{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:0.8rem;}
+  .participant .num{color:var(--ink-soft);font-size:0.74rem;}
+  .placeholder{color:var(--ink-soft);text-align:center;padding:60px 0;font-size:0.85rem;}
+  .banner{position:fixed;bottom:0;left:0;right:0;background:#1a1005;color:#fbbf24;text-align:center;padding:10px;font-size:0.78rem;border-top:1px solid #78350f;z-index:10;}
+  .view{display:none;}
+  .view.active{display:block;}
+  .roster-wrap{max-width:900px;margin:0 auto;padding:24px 28px;}
+  table{width:100%;border-collapse:collapse;font-size:0.82rem;}
+  th{text-align:left;padding:9px 10px;color:var(--ink-soft);font-weight:600;border-bottom:1px solid var(--border);}
+  td{padding:9px 10px;border-bottom:1px solid var(--surface-2);}
+  .btn{background:var(--accent);border:none;color:#fff;font-weight:700;padding:8px 16px;border-radius:6px;cursor:pointer;font-size:0.8rem;}
+  .toast{display:none;background:#123528;color:#34d399;padding:10px 14px;border-radius:6px;font-size:0.8rem;margin-top:14px;}
+  .toast.show{display:block;}
+  @media (max-width:760px){ .layout{grid-template-columns:1fr;} .col-left{border-right:none;border-bottom:1px solid var(--border);} }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="brand">Field<span class="call">Call</span></div>
+  <div style="font-size:0.8rem;color:var(--ink-soft);">Meridian Pest &amp; Wildlife</div>
+</header>
+
+<div class="tabs" id="tabs">
+  <button class="active" data-v="history">Call History</button>
+  <button data-v="roster">Tech Roster</button>
+</div>
+
+<div class="view active" id="history">
+  <div class="layout">
+    <div class="col-left" id="callList"></div>
+    <div class="col-right" id="callDetail"><div class="placeholder">Select a call to see details, recordings &amp; transcripts</div></div>
+  </div>
+</div>
+
+<div class="view" id="roster">
+  <div class="roster-wrap">
+    <table>
+      <thead><tr><th>Name</th><th>Phone</th><th>Role</th></tr></thead>
+      <tbody id="rosterTable"></tbody>
+    </table>
+    <button class="btn" style="margin-top:16px;" onclick="showToast()">+ Add Technician</button>
+    <div class="toast" id="rosterToast">✓ Technician added to roster (demo — not saved).</div>
+  </div>
+</div>
+
+<div class="banner">⚠ DEMO — every name and phone number on this page is randomly generated placeholder data, not real personal information.</div>
+
+<script>
+function rand(min,max){ return Math.floor(Math.random()*(max-min+1))+min; }
+function pick(arr){ return arr[rand(0,arr.length-1)]; }
+const firstNames = ['Jordan','Casey','Morgan','Taylor','Riley','Avery','Drew','Reese','Skyler','Cameron','Dakota','Rowan','Emerson','Finley'];
+const lastNames = ['Whitfield','Brennan','Okafor','Delgado','Nakamura','Petrov','Alvarado','Lindqvist','Marsh','Falcone','Reyes','Kowalski'];
+const techs = Array.from({length:10}, ()=> pick(firstNames)+' '+pick(lastNames)[0]+'.');
+
+function fakePhone(){ return '(314) 555-'+String(rand(0,9999)).padStart(4,'0'); }
+
+const mondays = ['September 14, 2026','September 8, 2026','September 3, 2026','August 31, 2026','August 24, 2026'];
+const calls = mondays.map(date=>{
+  const n = rand(8,16);
+  return {
+    date, duration: rand(15,30)+'m '+rand(0,59)+'s',
+    participants: Array.from({length:n}, ()=>({ name: pick(techs), phone: fakePhone() }))
+  };
+});
+
+document.getElementById('callList').innerHTML = calls.map((c,i)=>`
+  <div class="call-group">
+    <h4>Monday, ${c.date}</h4>
+    <div class="call-meta">${c.duration} · Rec · Transcript</div>
+    ${c.participants.map(p=>`<span class="pill" onclick="openCall(${i})">${p.name}</span>`).join('')}
+  </div>
+`).join('');
+
+function openCall(i){
+  const c = calls[i];
+  document.getElementById('callDetail').innerHTML = `
+    <h3 style="margin-top:0;">Monday, ${c.date}</h3>
+    <div class="call-meta">Participants (${c.participants.length})</div>
+    ${c.participants.map(p=>`<div class="participant"><span>${p.name}</span><span class="num">${p.phone}</span></div>`).join('')}
+  `;
+}
+
+const roles = ['Tech','Tech','Tech','Manager','Office'];
+document.getElementById('rosterTable').innerHTML = techs.map((t,i)=>`
+  <tr><td>${t}</td><td>${fakePhone()}</td><td>${roles[i%roles.length]}</td></tr>
+`).join('');
+function showToast(){
+  const t = document.getElementById('rosterToast');
+  t.classList.add('show');
+  setTimeout(()=>t.classList.remove('show'), 2500);
+}
+
+document.getElementById('tabs').addEventListener('click', e=>{
+  if(e.target.tagName!=='BUTTON') return;
+  document.querySelectorAll('#tabs button').forEach(b=>b.classList.remove('active'));
+  document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
+  e.target.classList.add('active');
+  document.getElementById(e.target.dataset.v).classList.add('active');
+});
+</script>
+
+</body>
+</html>
